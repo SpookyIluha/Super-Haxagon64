@@ -60,8 +60,8 @@ filesystem/fonts/%.font64: assets/fonts/%.ttf
 	@echo "    [FONT] $@"
 	$(N64_MKFONT) $(MKFONT_FLAGS) -o filesystem/fonts/ "$<"
 
-filesystem/fonts/bump-it-up-16.font64: MKFONT_FLAGS+=--size 18 --outline 2
-filesystem/fonts/bump-it-up-32.font64: MKFONT_FLAGS+=--size 36 --outline 2
+filesystem/fonts/bump-it-up-16.font64: MKFONT_FLAGS+=--size 14 --outline 1
+filesystem/fonts/bump-it-up-32.font64: MKFONT_FLAGS+=--size 28 --outline 1
 
 
 $(BUILD_DIR)/SuperHaxagon64.dfs: $(assets_conv)
