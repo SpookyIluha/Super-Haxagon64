@@ -188,7 +188,9 @@ namespace SuperHaxagon {
 	}
 	
 	void Level::pulse(const float scale) {
+		addRumble(0.2f);
 		_pulse = PULSE_DISTANCE * scale;
+
 	}
 
 	void Level::setWinFactory(const LevelFactory* factory) {

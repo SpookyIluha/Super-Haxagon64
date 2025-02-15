@@ -1,0 +1,7 @@
+#ifndef CONFIGURATION_HPP
+#define CONFIGURATION_HPP
+
+#define VERSION "Nintendo 64 v3.6.0"
+#define DEBUG_CONSOLE ${DEBUG_CONSOLE}
+
+#endif //CONFIGURATION_HPP

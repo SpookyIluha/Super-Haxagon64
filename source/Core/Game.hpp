@@ -126,4 +126,10 @@ namespace SuperHaxagon {
 	};
 }
 
+double getCurrentTime();
+
+void addRumble(double time);
+
+void updateRumble(double dt);
+
 #endif //SUPER_HAXAGON_GAME_HPP

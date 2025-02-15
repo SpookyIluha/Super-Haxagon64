@@ -77,6 +77,7 @@ namespace SuperHaxagon {
 
 		// Keys
 		if(pressed.back || hit == Movement::DEAD) {
+			addRumble(1.3f);
 			if (&_factory != &_selected &&
 			    _factory.getCreator() == "REDHAT" && 
 			    (_factory.getName() == "VOID" || _factory.getName() == "NULL") &&

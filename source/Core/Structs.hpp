@@ -117,7 +117,7 @@ namespace SuperHaxagon {
 	 * Reads an integer from a file advancing its internal pointer
 	 */
 	int32_t read32(std::istream& stream, int32_t min, int32_t max, Platform& platform, const std::string& noun);
-
+	int32_t read32_noswap(std::istream& stream, const int32_t min, const int32_t max, Platform& platform, const std::string& noun);
 	/**
 	 * Reads a short from a file advancing its internal pointer
 	 */
@@ -138,6 +138,7 @@ namespace SuperHaxagon {
 	 */
 	std::string readString(std::istream& stream, Platform& platform, const std::string& noun);
 
+	std::string readString_byteswap(std::istream& stream, Platform& platform, const std::string& noun);
 	/**
 	 * Writes a string with a length to a binary file
 	 */

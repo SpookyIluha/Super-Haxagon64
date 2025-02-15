@@ -1,11 +1,13 @@
 #include "Core/Game.hpp"
 #include "Driver/Platform.hpp"
 
-#ifdef _WIN64
-int WinMain() {
-#else
-int main(int, char**) {
-#endif
+#include <libdragon.h>
+
+//#ifdef _WIN64
+//int WinMain() {
+//#else
+int main( int argc, char **argv ) {
+//#endif
 	SuperHaxagon::Platform platform;
 	platform.message(SuperHaxagon::Dbg::INFO, "main", "starting main");
 

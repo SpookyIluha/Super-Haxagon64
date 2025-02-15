@@ -7,7 +7,68 @@
 #include <sstream>
 #include <string>
 
+#include <libdragon.h>
+
 namespace SuperHaxagon {
+
+
+	// Byte swap unsigned short
+	uint16_t byteswap_uint16( uint16_t val ) 
+	{
+		return (val << 8) | (val >> 8 );
+	}
+
+	// Byte swap short
+	int16_t byteswap_int16( int16_t val ) 
+	{
+		return (val << 8) | ((val >> 8) & 0xFF);
+	}
+
+	// Byte swap unsigned int
+	uint32_t byteswap_uint32( uint32_t val )
+	{
+		val = ((val << 8) & 0xFF00FF00 ) | ((val >> 8) & 0xFF00FF ); 
+		return (val << 16) | (val >> 16);
+	}
+
+	// Byte swap int
+	int32_t byteswap_int32( int32_t val )
+	{
+		val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF ); 
+		return (val << 16) | ((val >> 16) & 0xFFFF);
+	}
+
+	int64_t byteswap_int64( int64_t val )
+	{
+		val = ((val << 8) & 0xFF00FF00FF00FF00ULL ) | ((val >> 8) & 0x00FF00FF00FF00FFULL );
+		val = ((val << 16) & 0xFFFF0000FFFF0000ULL ) | ((val >> 16) & 0x0000FFFF0000FFFFULL );
+		return (val << 32) | ((val >> 32) & 0xFFFFFFFFULL);
+	}
+
+	uint64_t byteswap_uint64( uint64_t val )
+	{
+		val = ((val << 8) & 0xFF00FF00FF00FF00ULL ) | ((val >> 8) & 0x00FF00FF00FF00FFULL );
+		val = ((val << 16) & 0xFFFF0000FFFF0000ULL ) | ((val >> 16) & 0x0000FFFF0000FFFFULL );
+		return (val << 32) | (val >> 32);
+	}
+
+	float byteswap_float( const float inFloat )
+	{
+		float retVal;
+		char *floatToConvert = ( char* ) & inFloat;
+		char *returnFloat = ( char* ) & retVal;
+
+		// swap the bytes into a temporary buffer
+		returnFloat[0] = floatToConvert[3];
+		returnFloat[1] = floatToConvert[2];
+		returnFloat[2] = floatToConvert[1];
+		returnFloat[3] = floatToConvert[0];
+
+		return retVal;
+	}
+
+
+
 	uint8_t clamp(const float v) {
 		if (v < 0) return 0;
 		if (v > 255) return 255;
@@ -102,15 +163,36 @@ namespace SuperHaxagon {
 		int32_t num;
 		stream.read(reinterpret_cast<char*>(&num), sizeof(num));
 
+		num = byteswap_int32(num);
+
 		if (num < min) {
 			num = min;
-			platform.message(Dbg::WARN, "int", noun + " is too small, but continuing anyway.");
+			platform.message(Dbg::WARN, "int", noun + " is too small (" + std::to_string(num) + "), but continuing anyway.");
 		}
 
 		if (num > max) {
 			num = max;
-			platform.message(Dbg::WARN, "int", noun + " is too large, but continuing anyway.");
+			platform.message(Dbg::WARN, "int", noun + " is too large (" + std::to_string(num) + "), but continuing anyway.");
 		}
+		
+
+		return num;
+	}
+
+	int32_t read32_noswap(std::istream& stream, const int32_t min, const int32_t max, Platform& platform, const std::string& noun) {
+		int32_t num;
+		stream.read(reinterpret_cast<char*>(&num), sizeof(num));
+
+		if (num < min) {
+			num = min;
+			platform.message(Dbg::WARN, "int", noun + " is too small (" + std::to_string(num) + "), but continuing anyway.");
+		}
+
+		if (num > max) {
+			num = max;
+			platform.message(Dbg::WARN, "int", noun + " is too large (" + std::to_string(num) + "), but continuing anyway.");
+		}
+		
 
 		return num;
 	}
@@ -118,12 +200,14 @@ namespace SuperHaxagon {
 	int16_t read16(std::istream& stream) {
 		int16_t num;
 		stream.read(reinterpret_cast<char*>(&num), sizeof(num));
+		num = byteswap_int16(num);
 		return num;
 	}
 
 	float readFloat(std::istream& stream) {
 		float num;
 		stream.read(reinterpret_cast<char*>(&num), sizeof(num));
+		num = byteswap_float(num);
 		return num;
 	}
 
@@ -137,12 +221,21 @@ namespace SuperHaxagon {
 	}
 
 	std::string readString(std::istream& stream, Platform& platform, const std::string& noun) {
-		const size_t length = read32(stream, 1, 300, platform, noun + " string");
+		uint32_t length = read32(stream, 1, 300, platform, noun + " string");
 		const auto read = std::make_unique<char[]>(length + 1);
 		stream.read(read.get(), length);
 		read[length] = '\0';
 		return std::string(read.get());
-	}
+	}	
+
+	std::string readString_byteswap(std::istream& stream, Platform& platform, const std::string& noun) {
+		int32_t length = read32(stream, 1, 300, platform, noun + " string");
+		byteswap_int32(length);
+		const auto read = std::make_unique<char[]>(length + 1);
+		stream.read(read.get(), length);
+		read[length] = '\0';
+		return std::string(read.get());
+	}	
 
 	void writeString(std::ostream& stream, const std::string& str) {
 		auto len = static_cast<uint32_t>(str.length());

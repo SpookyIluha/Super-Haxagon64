@@ -10,6 +10,8 @@
 #include "Factories/PatternFactory.hpp"
 #include "States/Load.hpp"
 
+#include <libdragon.h>
+
 #include <cmath>
 
 namespace SuperHaxagon {
@@ -53,6 +55,8 @@ namespace SuperHaxagon {
 			// A dilation of 1.0 is 1/60th of a second. Huge dilation spikes can happen
 			// when the process is suspended (for example, the 3ds on the home menu)
 			dilation = dilation > 5.0f ? 5.0f : (dilation < 0.05f ? 0.05f : dilation);
+
+			updateRumble(display_get_delta_time());
 
 			// For platforms that need it, tick the BGM.
 			if (_bgm) _bgm->update();
@@ -242,4 +246,20 @@ namespace SuperHaxagon {
 			}
 		}
 	}
+
+}
+
+float rumbleTime = 0;
+
+double getCurrentTime() {
+	double ticks = timer_ticks();
+	return TICKS_TO_MS(ticks) / 1000.0f;
+}
+
+void addRumble(double time){
+	rumbleTime = getCurrentTime() + time;
+}
+
+void updateRumble(double dt){
+	joypad_set_rumble_active(JOYPAD_PORT_1, rumbleTime > getCurrentTime());
 }

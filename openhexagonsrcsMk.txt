@@ -1,0 +1,40 @@
+SRCS		+= source/States/Load.cpp
+SRCS		+= source/States/Menu.cpp
+SRCS		+= source/States/Over.cpp
+SRCS		+= source/States/Play.cpp
+SRCS		+= source/States/Quit.cpp
+SRCS		+= source/States/Transition.cpp
+SRCS		+= source/States/Win.cpp
+
+SRCS		+= source/Factories/LevelFactory.cpp
+SRCS		+= source/Factories/PatternFactory.cpp
+SRCS		+= source/Factories/WallFactory.cpp
+
+SRCS		+= source/Objects/Level.cpp
+SRCS		+= source/Objects/Pattern.cpp
+SRCS		+= source/Objects/Wall.cpp
+
+SRCS		+= source/Core/Game.cpp
+SRCS		+= source/Core/Metadata.cpp
+SRCS		+= source/Core/Structs.cpp
+
+OBJS		+= source/Main.o
+OBJS		+= source/States/Load.o
+OBJS		+= source/States/Menu.o
+OBJS		+= source/States/Over.o
+OBJS		+= source/States/Play.o
+OBJS		+= source/States/Quit.o
+OBJS		+= source/States/Transition.o
+OBJS		+= source/States/Win.o
+
+OBJS		+= source/Factories/LevelFactory.o
+OBJS		+= source/Factories/PatternFactory.o
+OBJS		+= source/Factories/WallFactory.o
+
+OBJS		+= source/Objects/Level.o
+OBJS		+= source/Objects/Pattern.o
+OBJS		+= source/Objects/Wall.o
+
+OBJS		+= source/Core/Game.o
+OBJS		+= source/Core/Metadata.o
+OBJS		+= source/Core/Structs.o

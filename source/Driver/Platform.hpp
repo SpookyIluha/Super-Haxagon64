@@ -82,7 +82,7 @@ namespace SuperHaxagon {
 
 		void shutdown();
 		void message(Dbg level, const std::string& where, const std::string& message) const;
-		static Supports supports();
+		Supports supports();
 
 	private:
 		std::unique_ptr<PlatformData> _plat{};

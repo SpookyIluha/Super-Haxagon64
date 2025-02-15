@@ -22,7 +22,7 @@ namespace SuperHaxagon {
 		~Load() override;
 
 		bool loadLevels(std::istream& stream, Location location) const;
-		bool loadScores(std::istream& stream) const;
+		bool loadScores(std::istream& stream, uint8_t* data) const;
 
 		std::unique_ptr<State> update(float dilation) override;
 		void enter() override;

@@ -1,0 +1,5 @@
+SRCS		+= source/Driver/N64/FontN64.cpp
+SRCS		+= source/Driver/N64/MusicN64.cpp
+SRCS		+= source/Driver/N64/PlatformN64.cpp
+SRCS		+= source/Driver/N64/SoundN64.cpp
+SRCS		+= source/Driver/Common/PlatformSupportsFilesystem.cpp

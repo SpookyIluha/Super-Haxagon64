@@ -47,6 +47,9 @@ namespace SuperHaxagon {
 			{"T.CAVANAGH", "ORIGINAL", "GAME AND IDEA"},
 			{"AJ WALTER", "REDTOPPER", "CREATOR"},
 
+			{"PORTING", "", ""},
+			{"SPOOKYILUHA", "N64BREW", "NINTENDO 64 PORT"},
+
 			{"ASSETS", "", ""},
 			{"V. ROMEO", "OPEN HEXAGON", "SFX"},
 			{"k. MACLEOD", "BGM", "TITLE AND VOID"},

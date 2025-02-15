@@ -14,6 +14,42 @@
 #include <ostream>
 #include <fstream>
 
+#include <libdragon.h>
+
+class membuf : public std::basic_streambuf<char> {
+	public:
+	  membuf(const uint8_t *p, size_t l) {
+		setg((char*)p, (char*)p, (char*)p + l);
+	  }
+	};
+
+	class omemstream : public std::ostream {
+		public:
+		  omemstream(const uint8_t *p, size_t l) :
+			std::ostream(&_buffer),
+			_buffer(p, l) {
+			rdbuf(&_buffer);
+		  }
+		
+		private:
+		  membuf _buffer;
+		};
+
+uint8_t* writedata(uint8_t* ptr, uint8_t* src, int size){
+	int i = 0;
+	for(; i < size; i++){
+		ptr[i] = src[i];
+	}
+	return ptr + i;
+}
+
+uint8_t* writedatastring(uint8_t* ptr, const std::string& str) {
+	auto len = static_cast<uint32_t>(str.length());
+	ptr = writedata(ptr, (uint8_t*)reinterpret_cast<char*>(&len), sizeof(len));
+	ptr = writedata(ptr, (uint8_t*)str.c_str(), str.length());
+	return ptr;
+}
+
 namespace SuperHaxagon {
 
 	Over::Over(Game& game, std::unique_ptr<Level> level, LevelFactory& selected, const float score, std::string text) :
@@ -31,24 +67,37 @@ namespace SuperHaxagon {
 	void Over::enter() {
 		_game.playEffect(SoundEffect::OVER);
 
-		std::ofstream scores(_platform.getPath("/scores.db", Location::USER), std::ios::out | std::ios::binary);
+		printf( "Writing '%s'\n", "/scores.db" );
+		uint8_t* eepromfile = (uint8_t*)malloc(500);
+		memset(eepromfile, 0, (size_t)500);
 
-		if (!scores) return;
+		uint8_t* pos = eepromfile;
 
-		scores.write(Load::SCORE_HEADER, strlen(Load::SCORE_HEADER));
+		pos = writedata(pos, (uint8_t*)Load::SCORE_HEADER, strlen(Load::SCORE_HEADER));
 		auto levels = static_cast<uint32_t>(_game.getLevels().size());
-		scores.write(reinterpret_cast<char*>(&levels), sizeof(levels));
+		pos = writedata(pos, (uint8_t*)reinterpret_cast<char*>(&levels), sizeof(levels));
 
 		for (const auto& lev : _game.getLevels()) {
-			writeString(scores, lev->getName());
-			writeString(scores, lev->getDifficulty());
-			writeString(scores, lev->getMode());
-			writeString(scores, lev->getCreator());
+			pos = writedatastring(pos, lev->getName());
+			pos = writedatastring(pos, lev->getDifficulty());
+			pos = writedatastring(pos, lev->getMode());
+			pos = writedatastring(pos, lev->getCreator());
 			uint32_t highSc = lev->getHighScore();
-			scores.write(reinterpret_cast<char*>(&highSc), sizeof(highSc));
+			pos = writedata(pos, (uint8_t*)reinterpret_cast<char*>(&highSc), sizeof(highSc));
 		}
 
-		scores.write(Load::SCORE_FOOTER, strlen(Load::SCORE_FOOTER));
+		pos = writedata(pos, (uint8_t*)Load::SCORE_FOOTER, strlen(Load::SCORE_FOOTER));
+
+		debugf( "Writing '%s'\n", "/scores.db" );
+		for(int i = 0; i < 500; i++){
+			debugf("%x", eepromfile[i]);
+		} debugf("\n");
+		
+		if(eepfs_write("/scores.db", eepromfile, (size_t)500) == EEPFS_ESUCCESS)
+			debugf("writing successful\n");
+		else debugf("writing unsuccessful\n");
+
+		free(eepromfile);
 	}
 
 	std::unique_ptr<State> Over::update(const float dilation) {

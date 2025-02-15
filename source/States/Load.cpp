@@ -11,6 +11,45 @@
 #include <fstream>
 #include <climits>
 
+#include <libdragon.h>
+
+class membuf : public std::basic_streambuf<char> {
+	public:
+	  membuf(const uint8_t *p, size_t l) {
+		setg((char*)p, (char*)p, (char*)p + l);
+	  }
+	};
+
+	class memstream : public std::istream {
+		public:
+		  memstream(const uint8_t *p, size_t l) :
+			std::istream(&_buffer),
+			_buffer(p, l) {
+			rdbuf(&_buffer);
+		  }
+		
+		private:
+		  membuf _buffer;
+		};
+
+
+		uint8_t* readdata(uint8_t* ptr, uint8_t* dst, int size){
+			int i = 0;
+			for(; i < size; i++){
+				dst[i] = ptr[i];
+			}
+			return ptr + i;
+		}
+		
+		uint8_t* readdatastring(uint8_t* ptr, std::string& str) {
+			int32_t len;
+			ptr = readdata(ptr, (uint8_t*)reinterpret_cast<char*>(&len), sizeof(len));
+			debugf("len %li\n", len);
+			str = std::string(len, '\0');
+			ptr = readdata(ptr, (uint8_t*)str.c_str(), len);
+			return ptr;
+		}
+
 namespace SuperHaxagon {
 	const char* Load::PROJECT_HEADER = "HAX1.1";
 	const char* Load::PROJECT_FOOTER = "ENDHAX";
@@ -67,7 +106,7 @@ namespace SuperHaxagon {
 		return true;
 	}
 
-	bool Load::loadScores(std::istream& stream) const {
+	bool Load::loadScores(std::istream& stream, uint8_t* data) const {
 		if (!stream) {
 			_platform.message(Dbg::INFO, "scores", "no score database");
 			return true;
@@ -77,14 +116,17 @@ namespace SuperHaxagon {
 			_platform.message(Dbg::WARN,"scores", "score header invalid, skipping scores");
 			return true; // If there is no score database silently fail.
 		}
-
-		const auto numScores = read32(stream, 1, 300, _platform, "number of scores");
-		for (auto i = 0; i < numScores; i++) {
-			auto name = readString(stream, _platform, "score level name");
-			auto difficulty = readString(stream, _platform, "score level difficulty");
-			auto mode = readString(stream, _platform, "score level mode");
-			auto creator = readString(stream, _platform, "score level creator");
-			const auto score = read32(stream, 0, INT_MAX, _platform, "score");
+		uint8_t* ptr = data + sizeof(SCORE_HEADER) + 3;
+		//uint32_t dummy; ptr = readdata(ptr, (uint8_t*)&dummy, sizeof(dummy));
+		//uint32_t dummy2; ptr = readdata(ptr, (uint8_t*)&dummy2, sizeof(dummy2));
+		uint32_t numScores; ptr = readdata(ptr, (uint8_t*)&numScores, sizeof(numScores));
+		debugf("numscores %li\n", numScores);
+		for (uint32_t i = 0; i < numScores; i++) {
+			std::string name; ptr = readdatastring(ptr, name);
+			std::string difficulty; ptr = readdatastring(ptr, difficulty);
+			std::string mode; ptr = readdatastring(ptr, mode);
+			std::string creator; ptr = readdatastring(ptr, creator);
+			int32_t score = 0; ptr = readdata(ptr, (uint8_t*)&score, sizeof(score));
 			for (const auto& level : _game.getLevels()) {
 				if (level->getName() == name && level->getDifficulty() == difficulty && level->getMode() == mode && level->getCreator() == creator) {
 					level->setHighScore(score);
@@ -92,10 +134,10 @@ namespace SuperHaxagon {
 			}
 		}
 
-		if (!readCompare(stream, SCORE_FOOTER)) {
-			_platform.message(Dbg::WARN,"scores", "file footer invalid, db broken");
-			return false;
-		}
+		//if (!readCompare(stream, SCORE_FOOTER)) {
+		//	_platform.message(Dbg::WARN,"scores", "file footer invalid, db broken");
+		//	return false;
+		//}
 
 		return true;
 	}
@@ -120,8 +162,21 @@ namespace SuperHaxagon {
 			return;
 		}
 
-		std::ifstream scores(_platform.getPath("/scores.db", Location::USER), std::ios::in | std::ios::binary);
-		if (!loadScores(scores)) return;
+		//std::ifstream scores(_platform.getPath("/scores.db", Location::USER), std::ios::in | std::ios::binary);
+		debugf( "Reading '%s'\n", "/scores.db" );
+		uint8_t* eepromfile = (uint8_t*)malloc(500);
+		memset(eepromfile, 0, (size_t)500);
+		
+		const int result = eepfs_read("/scores.db", eepromfile, (size_t)500);
+		if(result != EEPFS_ESUCCESS) debugf("eeprom file read unsuccessful\n");
+
+		for(int i = 0; i < 500; i++){
+			debugf("%x", eepromfile[i]);
+		} debugf("\n");
+
+		memstream stream(eepromfile, (size_t)500);
+		if (!loadScores(stream, eepromfile)) return;
+		free(eepromfile);
 
 		_loaded = true;
 	}
