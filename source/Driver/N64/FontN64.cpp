@@ -76,7 +76,7 @@ namespace SuperHaxagon {
 			parms.align = ALIGN_RIGHT;
 			xpos -= getWidth(str_dynamic.c_str());
 		}
-		rdpq_fontstyle_t style;
+		rdpq_fontstyle_t style = {0};
 		style.outline_color = RGBA32(0,0,0,255);
 		style.color = RGBA32(color.r, color.g, color.b, color.a);
 		rdpq_font_style(_data->font, 0, &style);
