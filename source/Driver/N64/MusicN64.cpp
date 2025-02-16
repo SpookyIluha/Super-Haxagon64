@@ -20,7 +20,6 @@ namespace SuperHaxagon {
 		bool  loop = false;
 		float start = 0;
 		float diff = 0;
-		float pausepos = -1;
 	};
 
     double getNow() {
@@ -40,8 +39,6 @@ namespace SuperHaxagon {
 	}
 
 	void Music::update() const {
-
-		if(_data->pausepos > 0)
 		mixer_try_play();
 	}
 
@@ -51,30 +48,23 @@ namespace SuperHaxagon {
 	}
 
 	void Music::play() const {
-		if(_data->pausepos > 0){
-			_data->pausepos = -1;
-		} else {
-			_data->start = getNow();
-			wav64_play(&(_data->music), 0);
-			return;
-		}
+		_data->start = getNow();
+		wav64_play(&(_data->music), 0);
 
 		if (_data->diff > 0) _data->start += getNow() - _data->diff;
 		_data->diff = 0;
-		mixer_ch_set_vol(0, 0.75, 0.75);
+		mixer_ch_set_vol(0, 0.5, 0.5);
 	}
 
 	void Music::pause() const {
-		_data->pausepos = 1;
-		//mixer_ch_set_vol(0, 0, 0);
+		mixer_ch_stop(0);
 	}
 
 	bool Music::isDone() const {
-		float len = (float)_data->music.wave.len / _data->music.wave.frequency;
-		return getTime() > len;
+		return !mixer_ch_playing(0);
 	}
 
 	float Music::getTime() const {
-		return _data->diff > 0 ? _data->diff - _data->start : getNow() - _data->start;
+		return mixer_ch_get_pos(0) / _data->music.wave.frequency;
 	}
 }
