@@ -7,7 +7,7 @@ include $(N64_INST)/include/n64.mk
 N64_CXXFLAGS += -Isource/ -O3 -ffunction-sections -fdata-sections
 
 # File aggregators
-SRCS		:= source/main.cpp
+SRCS		:= source/Main.cpp
 
 # Game sources
 include ./openhexagonsrcsMk.txt
@@ -60,14 +60,14 @@ filesystem/fonts/%.font64: assets/fonts/%.ttf
 	@echo "    [FONT] $@"
 	$(N64_MKFONT) $(MKFONT_FLAGS) -o filesystem/fonts/ "$<"
 
-filesystem/fonts/bump-it-up-16.font64: MKFONT_FLAGS+=--size 18 --outline 2
-filesystem/fonts/bump-it-up-32.font64: MKFONT_FLAGS+=--size 36 --outline 2
+filesystem/fonts/bump-it-up-16.font64: MKFONT_FLAGS+=--size 14 --outline 1
+filesystem/fonts/bump-it-up-32.font64: MKFONT_FLAGS+=--size 28 --outline 1
 
 
 $(BUILD_DIR)/SuperHaxagon64.dfs: $(assets_conv)
 $(BUILD_DIR)/SuperHaxagon64.elf: $(SRCS:%.cpp=$(BUILD_DIR)/%.o)
 
-SuperHaxagon64.z64: N64_ROM_TITLE="Starship Madness 64"
+SuperHaxagon64.z64: N64_ROM_TITLE="Super Haxagon 64"
 SuperHaxagon64.z64: $(BUILD_DIR)/SuperHaxagon64.dfs
 SuperHaxagon64.z64: N64_ROM_SAVETYPE = eeprom4k
 

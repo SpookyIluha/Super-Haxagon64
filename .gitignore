@@ -9,4 +9,5 @@
 /.idea
 /.vs
 .DS_Store
-
+/filesystem
+*.z64
