@@ -121,7 +121,7 @@ namespace SuperHaxagon {
 	}
 
 	float Platform::getDilation() const {
-		return display_get_delta_time() / (1 / 50.0f);
+		return display_get_delta_time() / (1 / 60.0f);
 	}
 
 	std::string Platform::getPath(const std::string& partial, const Location location) const {
